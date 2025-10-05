@@ -45,7 +45,7 @@ const Inventory = () => {
 
       if (error) throw error;
       setMedicines(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Failed to load medicines");
       console.error(error);
     } finally {

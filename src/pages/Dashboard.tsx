@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Package,
   ShoppingCart,
@@ -18,6 +19,7 @@ const Dashboard = () => {
     todayRevenue: 0,
     expiringItems: 0,
   });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadDashboardStats();
@@ -64,8 +66,15 @@ const Dashboard = () => {
         todayRevenue: revenue,
         expiringItems: expiringCount || 0,
       });
+      setErrorMessage(null);
     } catch (error) {
       console.error("Error loading dashboard stats:", error);
+      const message = (error as Error).message ?? "Could not load dashboard metrics.";
+      setErrorMessage(
+        message.toLowerCase().includes("schema cache")
+          ? "Supabase schema is missing one or more dashboard tables. Apply the latest migrations and redeploy."
+          : message,
+      );
     }
   };
 
@@ -109,7 +118,7 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-10">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 pb-16 pt-10 lg:px-12">
         <div className="max-w-4xl space-y-2">
           <p className="text-sm uppercase tracking-[0.4em] text-white/50">Overview</p>
           <h1 className="text-4xl font-black tracking-tight text-white">
@@ -119,6 +128,13 @@ const Dashboard = () => {
             Monitor inventory health, real-time sales, and prescription activity across the pharmacy network.
           </p>
         </div>
+
+        {errorMessage && (
+          <Alert variant="destructive" className="border-destructive/40 bg-destructive/10 text-destructive-foreground">
+            <AlertTitle>Dashboard metrics unavailable</AlertTitle>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="fade-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {statCards.map((stat, index) => (

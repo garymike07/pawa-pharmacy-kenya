@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -68,6 +69,8 @@ const Suppliers = () => {
   const {
     data: suppliers = [],
     isLoading,
+    isError,
+    error: suppliersError,
   } = useQuery({ queryKey: ["suppliers"], queryFn: fetchSuppliers });
 
   const form = useForm<SupplierFormValues>({
@@ -108,9 +111,20 @@ const Suppliers = () => {
     createSupplierMutation.mutate(values);
   };
 
+  const getSuppliersErrorMessage = (error: unknown) => {
+    if (!error) return "We couldn't load suppliers.";
+    const message = (error as Error).message ?? "";
+    if (message.toLowerCase().includes("schema cache")) {
+      return "Supabase is missing the suppliers table. Apply the project migrations and redeploy.";
+    }
+    return message;
+  };
+
+  const suppliersErrorMessage = isError ? getSuppliersErrorMessage(suppliersError) : null;
+
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pb-16 pt-10 lg:px-12">
         <div className="space-y-2">
           <span className="text-xs uppercase tracking-[0.3em] text-primary/70">Partner Network</span>
           <h1 className="text-4xl font-semibold leading-tight text-white">Supplier Management</h1>
@@ -118,6 +132,13 @@ const Suppliers = () => {
             Maintain trusted pharmaceutical contacts, track delivery partners, and keep your procurement records organized.
           </p>
         </div>
+
+        {suppliersErrorMessage && (
+          <Alert variant="destructive" className="border-destructive/40 bg-destructive/10 text-destructive-foreground">
+            <AlertTitle>Suppliers unavailable</AlertTitle>
+            <AlertDescription>{suppliersErrorMessage}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[1.3fr,1fr] fade-grid">
           <Card className="glass-panel border-primary/30">
@@ -135,12 +156,12 @@ const Suppliers = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-5 md:grid-cols-12">
                     <FormField
                       control={form.control}
                       name="name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Supplier Name</FormLabel>
                           <FormControl>
                             <Input placeholder="PharmaCo Ltd" className="glass-panel border-primary/10" {...field} />
@@ -153,7 +174,7 @@ const Suppliers = () => {
                       control={form.control}
                       name="contactPerson"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Contact Person</FormLabel>
                           <FormControl>
                             <Input placeholder="Jane Doe" className="glass-panel border-primary/10" {...field} />
@@ -166,7 +187,7 @@ const Suppliers = () => {
                       control={form.control}
                       name="phone"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Phone</FormLabel>
                           <FormControl>
                             <Input placeholder="0712 345 678" className="glass-panel border-primary/10" {...field} />
@@ -179,7 +200,7 @@ const Suppliers = () => {
                       control={form.control}
                       name="email"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Email</FormLabel>
                           <FormControl>
                             <Input type="email" placeholder="supplier@email.com" className="glass-panel border-primary/10" {...field} />
@@ -236,8 +257,8 @@ const Suppliers = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="glass-panel border border-primary/10 overflow-hidden">
-                <Table>
+              <div className="glass-panel overflow-x-auto border border-primary/10">
+                <Table className="min-w-[680px]">
                   <TableHeader>
                     <TableRow className="bg-primary/5">
                       <TableHead>Name</TableHead>
@@ -254,6 +275,12 @@ const Suppliers = () => {
                             <Loader2 className="h-4 w-4 animate-spin" />
                             Loading suppliers...
                           </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : isError ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="py-6 text-center text-destructive">
+                          {suppliersErrorMessage ?? "Unable to load suppliers"}
                         </TableCell>
                       </TableRow>
                     ) : suppliers.length === 0 ? (

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -141,9 +142,16 @@ const Sales = () => {
   const {
     data: medicines = [],
     isLoading: loadingMedicines,
+    isError: medicinesError,
+    error: medicinesErrorDetails,
   } = useQuery({ queryKey: ["medicines"], queryFn: fetchMedicines });
 
-  const { data: prescriptions = [], isLoading: loadingPrescriptions } = useQuery({
+  const {
+    data: prescriptions = [],
+    isLoading: loadingPrescriptions,
+    isError: prescriptionsError,
+    error: prescriptionsErrorDetails,
+  } = useQuery({
     queryKey: ["prescriptions"],
     queryFn: fetchPrescriptions,
   });
@@ -151,6 +159,8 @@ const Sales = () => {
   const {
     data: salesHistory = [],
     isLoading: loadingSalesHistory,
+    isError: salesError,
+    error: salesErrorDetails,
   } = useQuery({ queryKey: ["sales"], queryFn: fetchSalesHistory });
 
   const selectedMedicine = useMemo(
@@ -162,6 +172,21 @@ const Sales = () => {
     () => saleItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0),
     [saleItems],
   );
+
+  const formatDataError = (error: unknown, fallback: string) => {
+    if (!error) return fallback;
+    const message = (error as Error).message ?? fallback;
+    if (message.toLowerCase().includes("schema cache")) {
+      return `${fallback} Ensure the related Supabase table exists and migrations have been applied.`;
+    }
+    return message;
+  };
+
+  const salesDataErrors = [
+    medicinesError ? formatDataError(medicinesErrorDetails, "We couldn't load the medicines catalogue.") : null,
+    prescriptionsError ? formatDataError(prescriptionsErrorDetails, "Prescription records are unavailable right now.") : null,
+    salesError ? formatDataError(salesErrorDetails, "Sales history failed to load.") : null,
+  ].filter(Boolean) as string[];
 
   const handleAddItem = () => {
     if (!selectedMedicine) {
@@ -302,7 +327,7 @@ const Sales = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pb-16 pt-10 lg:px-12">
         <div className="space-y-2">
           <span className="text-xs uppercase tracking-[0.3em] text-primary/70">Point of Sale</span>
           <h1 className="text-4xl font-semibold leading-tight text-white">Sales & Dispensing Console</h1>
@@ -310,6 +335,21 @@ const Sales = () => {
             Build prescriptions, capture patient payments, and keep stock levels synchronized in real time.
           </p>
         </div>
+
+        {salesDataErrors.length > 0 && (
+          <div className="space-y-3">
+            {salesDataErrors.map((message, index) => (
+              <Alert
+                key={index}
+                variant="destructive"
+                className="border-destructive/40 bg-destructive/10 text-destructive-foreground"
+              >
+                <AlertTitle>Data source issue</AlertTitle>
+                <AlertDescription>{message}</AlertDescription>
+              </Alert>
+            ))}
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[1.6fr,1fr] fade-grid">
           <Card className="glass-panel border-primary/30">
@@ -327,12 +367,12 @@ const Sales = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-5 md:grid-cols-12">
                     <FormField
                       control={form.control}
                       name="customerName"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Customer Name</FormLabel>
                           <FormControl>
                             <Input placeholder="Jane Doe" className="glass-panel border-primary/10" {...field} />
@@ -345,7 +385,7 @@ const Sales = () => {
                       control={form.control}
                       name="customerPhone"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Customer Phone</FormLabel>
                           <FormControl>
                             <Input placeholder="0712 345 678" className="glass-panel border-primary/10" {...field} />
@@ -358,7 +398,7 @@ const Sales = () => {
                       control={form.control}
                       name="paymentMethod"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Payment Method</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
@@ -381,7 +421,7 @@ const Sales = () => {
                       control={form.control}
                       name="prescriptionId"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Prescription</FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -409,8 +449,8 @@ const Sales = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-[2fr,1fr,auto]">
-                      <div className="space-y-2">
+                    <div className="grid gap-4 md:grid-cols-12">
+                      <div className="space-y-2 md:col-span-6">
                         <label className="text-sm font-medium text-white/80">Medicine</label>
                         <Select
                           value={selectedMedicineId}
@@ -428,8 +468,13 @@ const Sales = () => {
                             ))}
                           </SelectContent>
                         </Select>
+                        {medicinesError && (
+                          <p className="text-xs text-destructive/80">
+                            Unable to load medicines. {formatDataError(medicinesErrorDetails, "")}
+                          </p>
+                        )}
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-3">
                         <label className="text-sm font-medium text-white/80">Quantity</label>
                         <Input
                           type="number"
@@ -439,7 +484,7 @@ const Sales = () => {
                           className="glass-panel border-primary/10"
                         />
                       </div>
-                      <div className="flex items-end">
+                      <div className="flex items-end md:col-span-3">
                         <Button
                           type="button"
                           onClick={handleAddItem}
@@ -458,8 +503,8 @@ const Sales = () => {
                       </p>
                     )}
 
-                    <div className="glass-panel border border-primary/10 overflow-hidden">
-                      <Table>
+                    <div className="glass-panel overflow-x-auto border border-primary/10">
+                      <Table className="min-w-[720px]">
                         <TableHeader>
                           <TableRow className="bg-primary/5">
                             <TableHead>Medicine</TableHead>
@@ -536,8 +581,8 @@ const Sales = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="glass-panel border border-primary/10 overflow-hidden">
-                <Table>
+              <div className="glass-panel overflow-x-auto border border-primary/10">
+                <Table className="min-w-[680px]">
                   <TableHeader>
                     <TableRow className="bg-primary/5">
                       <TableHead>Sale #</TableHead>

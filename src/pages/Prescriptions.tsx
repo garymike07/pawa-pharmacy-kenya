@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -78,6 +79,8 @@ const Prescriptions = () => {
   const {
     data: prescriptions = [],
     isLoading,
+    isError,
+    error: prescriptionsError,
   } = useQuery({ queryKey: ["prescriptions"], queryFn: fetchPrescriptions });
 
   const form = useForm<PrescriptionFormValues>({
@@ -140,9 +143,20 @@ const Prescriptions = () => {
     createPrescriptionMutation.mutate(values);
   };
 
+  const getPrescriptionsErrorMessage = (error: unknown) => {
+    if (!error) return "We couldn't load prescriptions. Please try again.";
+    const message = (error as Error).message ?? "";
+    if (message.toLowerCase().includes("schema cache")) {
+      return "Supabase is missing the prescriptions table. Apply the latest migrations and redeploy.";
+    }
+    return message;
+  };
+
+  const prescriptionsErrorMessage = isError ? getPrescriptionsErrorMessage(prescriptionsError) : null;
+
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pb-16 pt-10 lg:px-12">
         <div className="space-y-2">
           <span className="text-xs uppercase tracking-[0.3em] text-primary/70">Clinical Records</span>
           <h1 className="text-4xl font-semibold leading-tight text-white">Prescription Management</h1>
@@ -150,6 +164,13 @@ const Prescriptions = () => {
             Capture doctor directives, patient notes, and keep your pharmacy records compliant with regulatory requirements.
           </p>
         </div>
+
+        {prescriptionsErrorMessage && (
+          <Alert variant="destructive" className="border-destructive/40 bg-destructive/10 text-destructive-foreground">
+            <AlertTitle>Prescription data unavailable</AlertTitle>
+            <AlertDescription>{prescriptionsErrorMessage}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[1.4fr,1fr] fade-grid">
           <Card className="glass-panel border-primary/30">
@@ -167,12 +188,12 @@ const Prescriptions = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-5 md:grid-cols-12">
                     <FormField
                       control={form.control}
                       name="prescriptionNumber"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Prescription Number</FormLabel>
                           <FormControl>
                             <Input placeholder="RX-20241005-123" className="glass-panel border-primary/10" {...field} />
@@ -185,7 +206,7 @@ const Prescriptions = () => {
                       control={form.control}
                       name="prescriptionDate"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Date</FormLabel>
                           <FormControl>
                             <Input type="date" className="glass-panel border-primary/10" {...field} />
@@ -198,7 +219,7 @@ const Prescriptions = () => {
                       control={form.control}
                       name="patientName"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Patient Name</FormLabel>
                           <FormControl>
                             <Input placeholder="John Doe" className="glass-panel border-primary/10" {...field} />
@@ -211,7 +232,7 @@ const Prescriptions = () => {
                       control={form.control}
                       name="patientPhone"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Patient Phone</FormLabel>
                           <FormControl>
                             <Input placeholder="0712 345 678" className="glass-panel border-primary/10" {...field} />
@@ -224,7 +245,7 @@ const Prescriptions = () => {
                       control={form.control}
                       name="doctorName"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Doctor Name</FormLabel>
                           <FormControl>
                             <Input placeholder="Dr. Jane Smith" className="glass-panel border-primary/10" {...field} />
@@ -237,7 +258,7 @@ const Prescriptions = () => {
                       control={form.control}
                       name="doctorLicense"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-6">
                           <FormLabel>Doctor License</FormLabel>
                           <FormControl>
                             <Input placeholder="License number" className="glass-panel border-primary/10" {...field} />
@@ -294,8 +315,8 @@ const Prescriptions = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="glass-panel border border-primary/10 overflow-hidden">
-                <Table>
+              <div className="glass-panel overflow-x-auto border border-primary/10">
+                <Table className="min-w-[680px]">
                   <TableHeader>
                     <TableRow className="bg-primary/5">
                       <TableHead>Number</TableHead>
@@ -312,6 +333,12 @@ const Prescriptions = () => {
                             <Loader2 className="h-4 w-4 animate-spin" />
                             Loading prescriptions...
                           </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : isError ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="py-6 text-center text-destructive">
+                          {prescriptionsErrorMessage ?? "Unable to load prescriptions"}
                         </TableCell>
                       </TableRow>
                     ) : prescriptions.length === 0 ? (

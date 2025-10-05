@@ -8,6 +8,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -232,7 +233,7 @@ const MedicineFormDialog = ({ open, onOpenChange, initialData, categories, suppl
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl border border-white/20 bg-gradient-to-br from-sidebar-background/90 via-background/90 to-background/80">
+      <DialogContent className="max-w-3xl border border-white/20 bg-gradient-to-br from-sidebar-background/90 via-background/90 to-background/80">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold text-white">
             {initialData ? "Edit medicine" : "Register new medicine"}
@@ -548,9 +549,22 @@ const Inventory = () => {
 
   const isExpired = (expiryDate: string) => new Date(expiryDate) < new Date();
 
+  const getInventoryErrorMessage = (error: unknown) => {
+    if (!error) {
+      return "We couldn't reach the inventory service. Please try again.";
+    }
+    const message = (error as Error).message ?? "";
+    if (message.toLowerCase().includes("schema cache")) {
+      return "Supabase is missing the required medicines tables. Run the latest migrations in supabase/migrations, apply them to your project, then redeploy.";
+    }
+    return message;
+  };
+
+  const inventoryErrorMessage = medicinesError ? getInventoryErrorMessage(medicinesErrorDetails) : null;
+
   return (
     <DashboardLayout>
-      <div className="space-y-10">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 pb-16 pt-10 lg:px-12">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.4em] text-white/50">Inventory</p>
@@ -572,17 +586,17 @@ const Inventory = () => {
         </div>
 
         <div className="glass-panel flex flex-col gap-6 border border-white/10 p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="relative w-full md:max-w-md">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <div className="relative w-full">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
               <Input
                 placeholder="Search by name, batch, category..."
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                className="h-12 rounded-xl border-white/10 bg-white/10 pl-10 text-white placeholder:text-white/40"
+                className="h-14 rounded-2xl border-white/10 bg-white/10 pl-12 text-base text-white placeholder:text-white/40"
               />
             </div>
-            <div className="flex items-center gap-4 text-xs text-white/50">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-white/50 md:justify-end">
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-2 w-2 rounded-full bg-destructive" /> Low stock
               </div>
@@ -595,8 +609,15 @@ const Inventory = () => {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-white/10">
-            <Table>
+          {inventoryErrorMessage && (
+            <Alert variant="destructive" className="border-destructive/40 bg-destructive/10 text-destructive-foreground">
+              <AlertTitle>Inventory data unavailable</AlertTitle>
+              <AlertDescription>{inventoryErrorMessage}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="overflow-x-auto rounded-2xl border border-white/10">
+            <Table className="min-w-[960px]">
               <TableHeader className="bg-white/5">
                 <TableRow className="border-white/10">
                   <TableHead className="text-white/70">Medicine</TableHead>
@@ -621,7 +642,7 @@ const Inventory = () => {
                 ) : medicinesError ? (
                   <TableRow>
                     <TableCell colSpan={8} className="py-10 text-center text-destructive">
-                      {(medicinesErrorDetails as Error)?.message ?? "Unable to load medicines"}
+                      {inventoryErrorMessage ?? "Unable to load medicines"}
                     </TableCell>
                   </TableRow>
                 ) : filteredMedicines.length === 0 ? (

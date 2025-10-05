@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Truck } from "lucide-react";
+import { Loader2, Truck } from "lucide-react";
 
 const supplierFormSchema = z.object({
   name: z.string().min(2, "Supplier name is required"),
@@ -109,18 +110,26 @@ const Suppliers = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Suppliers</h1>
-          <p className="text-muted-foreground mt-1">Manage supplier information</p>
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs uppercase tracking-[0.3em] text-primary/70">Partner Network</span>
+          <h1 className="text-4xl font-semibold leading-tight text-white">Supplier Management</h1>
+          <p className="max-w-2xl text-muted-foreground">
+            Maintain trusted pharmaceutical contacts, track delivery partners, and keep your procurement records organized.
+          </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.3fr,1fr]">
-          <Card className="border-primary/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Truck className="h-5 w-5" />
-                Add Supplier
+        <div className="grid gap-6 lg:grid-cols-[1.3fr,1fr] fade-grid">
+          <Card className="glass-panel border-primary/30">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-3 text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                  <Truck className="h-5 w-5" />
+                </span>
+                <div>
+                  <span className="block text-sm uppercase tracking-[0.2em] text-white/60">Add Supplier</span>
+                  <span className="text-lg font-semibold">New Vendor</span>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -134,7 +143,7 @@ const Suppliers = () => {
                         <FormItem>
                           <FormLabel>Supplier Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="PharmaCo Ltd" {...field} />
+                            <Input placeholder="PharmaCo Ltd" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -147,7 +156,7 @@ const Suppliers = () => {
                         <FormItem>
                           <FormLabel>Contact Person</FormLabel>
                           <FormControl>
-                            <Input placeholder="Jane Doe" {...field} />
+                            <Input placeholder="Jane Doe" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -160,7 +169,7 @@ const Suppliers = () => {
                         <FormItem>
                           <FormLabel>Phone</FormLabel>
                           <FormControl>
-                            <Input placeholder="0712 345 678" {...field} />
+                            <Input placeholder="0712 345 678" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -173,7 +182,7 @@ const Suppliers = () => {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="supplier@email.com" {...field} />
+                            <Input type="email" placeholder="supplier@email.com" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -188,30 +197,49 @@ const Suppliers = () => {
                       <FormItem>
                         <FormLabel>Address / Notes</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Physical address or additional notes" rows={4} {...field} />
+                          <Textarea
+                            placeholder="Physical address or additional notes"
+                            rows={4}
+                            className="glass-panel border-primary/10"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <Button type="submit" disabled={createSupplierMutation.isPending}>
-                    {createSupplierMutation.isPending ? "Saving..." : "Save Supplier"}
+                  <Button type="submit" disabled={createSupplierMutation.isPending} className="frosted-button">
+                    {createSupplierMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
+                      </>
+                    ) : (
+                      "Save Supplier"
+                    )}
                   </Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Suppliers Directory</CardTitle>
+          <Card className="glass-panel border-primary/30">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-3 text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                  <Truck className="h-5 w-5" />
+                </span>
+                <div>
+                  <span className="block text-sm uppercase tracking-[0.2em] text-white/60">Directory</span>
+                  <span className="text-lg font-semibold">Suppliers</span>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-lg overflow-hidden">
+              <div className="glass-panel border border-primary/10 overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/50">
+                    <TableRow className="bg-primary/5">
                       <TableHead>Name</TableHead>
                       <TableHead>Contact</TableHead>
                       <TableHead>Phone</TableHead>
@@ -221,8 +249,11 @@ const Suppliers = () => {
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-6">
-                          Loading suppliers...
+                        <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Loading suppliers...
+                          </div>
                         </TableCell>
                       </TableRow>
                     ) : suppliers.length === 0 ? (
@@ -244,9 +275,29 @@ const Suppliers = () => {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>{supplier.contact_person || "-"}</TableCell>
-                          <TableCell>{supplier.phone || "-"}</TableCell>
-                          <TableCell>{supplier.email || "-"}</TableCell>
+                          <TableCell>
+                            {supplier.contact_person ? (
+                              <Badge className="bg-primary/15 text-primary/90">
+                                {supplier.contact_person}
+                              </Badge>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {supplier.phone ? (
+                              <Badge className="bg-primary/15 text-primary/90">{supplier.phone}</Badge>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {supplier.email ? (
+                              <Badge className="bg-primary/15 text-primary/90">{supplier.email}</Badge>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
                         </TableRow>
                       ))
                     )}

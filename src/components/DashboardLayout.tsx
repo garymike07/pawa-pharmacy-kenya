@@ -50,60 +50,64 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Mobile menu button */}
+    <div className="relative flex min-h-screen overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.15),transparent_55%),radial-gradient(circle_at_bottom,rgba(236,72,153,0.12),transparent_60%)]" />
+
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-primary text-primary-foreground"
+        className="lg:hidden fixed top-4 left-4 z-50 rounded-full bg-white/15 p-2 text-white shadow-lg backdrop-blur-md transition hover:bg-white/25"
       >
         {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
 
-      {/* Sidebar */}
       <aside
         className={`${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-primary text-primary-foreground transition-transform duration-300 ease-in-out flex flex-col`}
+        } glass-panel fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-sidebar-background/60 text-sidebar-foreground shadow-2xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0`}
       >
-        <div className="p-6 border-b border-primary-foreground/10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/10">
+        <div className="border-b border-white/10 p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-accent shadow-inner">
               <Pill className="h-7 w-7" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Pawa Pharmacy</h1>
-              <p className="text-xs text-primary-foreground/70">Management System</p>
+              <h1 className="text-xl font-semibold tracking-wide">Pawa Pharmacy</h1>
+              <p className="text-xs uppercase tracking-[0.35em] text-white/60">Management Suite</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 space-y-2 overflow-y-auto p-4">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium tracking-wide transition ${
                 isActive(item.path)
-                  ? "bg-primary-foreground/10 font-semibold"
-                  : "hover:bg-primary-foreground/5"
+                  ? "bg-white/20 text-white shadow-[0_15px_45px_-25px_rgba(59,130,246,0.8)]"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <item.icon className="h-5 w-5" />
+              <span className={`flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/10 transition ${
+                isActive(item.path) ? "border-white/30 bg-white/20" : "group-hover:border-white/20"
+              }`}>
+                <item.icon className="h-4 w-4" />
+              </span>
               <span>{item.label}</span>
             </Link>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-primary-foreground/10">
-          <div className="mb-3 px-4">
-            <p className="text-xs text-primary-foreground/70">Signed in as</p>
-            <p className="text-sm font-medium truncate">{userEmail}</p>
+        <div className="border-t border-white/10 p-5">
+          <div className="mb-4 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/40">Signed in</p>
+            <p className="truncate text-base font-semibold text-white">{userEmail}</p>
           </div>
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="w-full justify-start gap-3 bg-transparent border-primary-foreground/20 hover:bg-primary-foreground/10 text-primary-foreground"
+            className="w-full justify-center gap-3 rounded-xl border-white/20 bg-white/10 text-white hover:bg-white/20"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -111,15 +115,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-4 lg:p-8 pt-20 lg:pt-8">{children}</div>
+      <main className="relative z-10 flex min-h-screen flex-1 flex-col overflow-hidden lg:ml-72">
+        <div className="flex-1 overflow-y-auto px-4 pb-12 pt-20 sm:px-6 lg:px-12 lg:pt-12">
+          <div className="mx-auto max-w-7xl space-y-10 animate-fade-in">
+            {children}
+          </div>
+        </div>
       </main>
 
-      {/* Overlay for mobile */}
       {mobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}

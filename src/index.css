@@ -8,89 +8,89 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 150 30% 98%;
-    --foreground: 160 15% 15%;
+    --background: 215 36% 10%;
+    --foreground: 200 74% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 160 15% 15%;
+    --card: 217 35% 14%;
+    --card-foreground: 200 74% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 160 15% 15%;
+    --popover: 220 35% 16%;
+    --popover-foreground: 200 74% 95%;
 
-    --primary: 160 60% 45%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 192 88% 56%;
+    --primary-foreground: 210 100% 10%;
 
-    --secondary: 150 20% 92%;
-    --secondary-foreground: 160 15% 15%;
+    --secondary: 232 48% 18%;
+    --secondary-foreground: 198 76% 92%;
 
-    --muted: 150 20% 95%;
-    --muted-foreground: 160 10% 45%;
+    --muted: 228 32% 22%;
+    --muted-foreground: 191 40% 74%;
 
-    --accent: 165 65% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 265 84% 68%;
+    --accent-foreground: 230 100% 12%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 2 92% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 160 60% 45%;
-    --warning: 38 92% 50%;
+    --success: 158 66% 54%;
+    --warning: 40 97% 60%;
 
-    --border: 150 20% 88%;
-    --input: 150 20% 90%;
-    --ring: 160 60% 45%;
+    --border: 225 32% 30%;
+    --input: 224 32% 24%;
+    --ring: 192 88% 56%;
 
-    --radius: 0.75rem;
+    --radius: 0.9rem;
 
-    --sidebar-background: 160 60% 45%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 165 65% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 160 50% 52%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 160 50% 40%;
-    --sidebar-ring: 165 65% 50%;
+    --sidebar-background: 240 40% 12%;
+    --sidebar-foreground: 198 76% 92%;
+    --sidebar-primary: 192 88% 56%;
+    --sidebar-primary-foreground: 210 100% 10%;
+    --sidebar-accent: 265 84% 68%;
+    --sidebar-accent-foreground: 230 100% 12%;
+    --sidebar-border: 228 32% 24%;
+    --sidebar-ring: 192 88% 56%;
   }
 
   .dark {
-    --background: 160 20% 10%;
-    --foreground: 150 15% 90%;
+    --background: 215 36% 10%;
+    --foreground: 200 74% 95%;
 
-    --card: 160 18% 13%;
-    --card-foreground: 150 15% 90%;
+    --card: 217 35% 14%;
+    --card-foreground: 200 74% 95%;
 
-    --popover: 160 18% 13%;
-    --popover-foreground: 150 15% 90%;
+    --popover: 220 35% 16%;
+    --popover-foreground: 200 74% 95%;
 
-    --primary: 160 60% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 192 88% 56%;
+    --primary-foreground: 210 100% 10%;
 
-    --secondary: 160 15% 20%;
-    --secondary-foreground: 150 15% 90%;
+    --secondary: 232 48% 18%;
+    --secondary-foreground: 198 76% 92%;
 
-    --muted: 160 15% 18%;
-    --muted-foreground: 150 10% 60%;
+    --muted: 228 32% 22%;
+    --muted-foreground: 191 40% 74%;
 
-    --accent: 165 65% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 265 84% 68%;
+    --accent-foreground: 230 100% 12%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 2 92% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 160 60% 50%;
-    --warning: 38 92% 50%;
+    --success: 158 66% 54%;
+    --warning: 40 97% 60%;
 
-    --border: 160 15% 22%;
-    --input: 160 15% 22%;
-    --ring: 160 60% 50%;
+    --border: 225 32% 30%;
+    --input: 224 32% 24%;
+    --ring: 192 88% 56%;
 
-    --sidebar-background: 160 20% 12%;
-    --sidebar-foreground: 150 15% 90%;
-    --sidebar-primary: 165 65% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 160 15% 20%;
-    --sidebar-accent-foreground: 150 15% 90%;
-    --sidebar-border: 160 15% 18%;
-    --sidebar-ring: 165 65% 55%;
+    --sidebar-background: 240 40% 12%;
+    --sidebar-foreground: 198 76% 92%;
+    --sidebar-primary: 192 88% 56%;
+    --sidebar-primary-foreground: 210 100% 10%;
+    --sidebar-accent: 265 84% 68%;
+    --sidebar-accent-foreground: 230 100% 12%;
+    --sidebar-border: 228 32% 24%;
+    --sidebar-ring: 192 88% 56%;
   }
 }
 
@@ -100,6 +100,44 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply min-h-screen bg-background text-foreground antialiased;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(circle at 15% 20%, hsla(192, 88%, 56%, 0.22), transparent 55%),
+      radial-gradient(circle at 85% 30%, hsla(265, 84%, 68%, 0.18), transparent 60%),
+      radial-gradient(circle at 50% 100%, hsla(158, 66%, 54%, 0.2), transparent 65%);
+    background-attachment: fixed;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply rounded-2xl border border-white/10 bg-white/10 dark:bg-white/10/40 backdrop-blur-xl shadow-[0_20px_45px_-25px_rgba(15,118,230,0.45)] transition-all duration-300;
+  }
+
+  .glass-panel:hover {
+    @apply border-white/20 shadow-[0_25px_55px_-25px_rgba(59,130,246,0.55)];
+  }
+
+  .frosted-button {
+    @apply relative overflow-hidden rounded-full bg-white/20 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow-lg transition-all duration-300 hover:bg-white/30 hover:shadow-[0_20px_45px_-20px_rgba(59,130,246,0.7)];
+  }
+
+  .frosted-button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.25) 45%, transparent 90%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .frosted-button:hover::after {
+    opacity: 1;
+  }
+
+  .fade-grid {
+    @apply animate-fade-in-up;
   }
 }

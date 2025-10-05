@@ -7,6 +7,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -26,7 +27,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FileText } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 
 const prescriptionFormSchema = z.object({
   prescriptionNumber: z.string().min(4, "Prescription number is required"),
@@ -141,18 +142,26 @@ const Prescriptions = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Prescriptions</h1>
-          <p className="text-muted-foreground mt-1">Manage patient prescriptions</p>
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs uppercase tracking-[0.3em] text-primary/70">Clinical Records</span>
+          <h1 className="text-4xl font-semibold leading-tight text-white">Prescription Management</h1>
+          <p className="max-w-2xl text-muted-foreground">
+            Capture doctor directives, patient notes, and keep your pharmacy records compliant with regulatory requirements.
+          </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.4fr,1fr]">
-          <Card className="border-primary/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                New Prescription
+        <div className="grid gap-6 lg:grid-cols-[1.4fr,1fr] fade-grid">
+          <Card className="glass-panel border-primary/30">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-3 text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                  <FileText className="h-5 w-5" />
+                </span>
+                <div>
+                  <span className="block text-sm uppercase tracking-[0.2em] text-white/60">Capture Prescription</span>
+                  <span className="text-lg font-semibold">New Entry</span>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -166,7 +175,7 @@ const Prescriptions = () => {
                         <FormItem>
                           <FormLabel>Prescription Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="RX-20241005-123" {...field} />
+                            <Input placeholder="RX-20241005-123" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -179,7 +188,7 @@ const Prescriptions = () => {
                         <FormItem>
                           <FormLabel>Date</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input type="date" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -192,7 +201,7 @@ const Prescriptions = () => {
                         <FormItem>
                           <FormLabel>Patient Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="John Doe" {...field} />
+                            <Input placeholder="John Doe" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -205,7 +214,7 @@ const Prescriptions = () => {
                         <FormItem>
                           <FormLabel>Patient Phone</FormLabel>
                           <FormControl>
-                            <Input placeholder="0712 345 678" {...field} />
+                            <Input placeholder="0712 345 678" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -218,7 +227,7 @@ const Prescriptions = () => {
                         <FormItem>
                           <FormLabel>Doctor Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Dr. Jane Smith" {...field} />
+                            <Input placeholder="Dr. Jane Smith" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -231,7 +240,7 @@ const Prescriptions = () => {
                         <FormItem>
                           <FormLabel>Doctor License</FormLabel>
                           <FormControl>
-                            <Input placeholder="License number" {...field} />
+                            <Input placeholder="License number" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -249,6 +258,7 @@ const Prescriptions = () => {
                           <Textarea
                             placeholder="Prescription details, dosage instructions, etc."
                             rows={4}
+                            className="glass-panel border-primary/10"
                             {...field}
                           />
                         </FormControl>
@@ -257,23 +267,37 @@ const Prescriptions = () => {
                     )}
                   />
 
-                  <Button type="submit" disabled={createPrescriptionMutation.isPending}>
-                    {createPrescriptionMutation.isPending ? "Saving..." : "Save Prescription"}
+                  <Button type="submit" disabled={createPrescriptionMutation.isPending} className="frosted-button">
+                    {createPrescriptionMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
+                      </>
+                    ) : (
+                      "Save Prescription"
+                    )}
                   </Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Prescriptions</CardTitle>
+          <Card className="glass-panel border-primary/30">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-3 text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                  <FileText className="h-5 w-5" />
+                </span>
+                <div>
+                  <span className="block text-sm uppercase tracking-[0.2em] text-white/60">Records</span>
+                  <span className="text-lg font-semibold">Recent Prescriptions</span>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-lg overflow-hidden">
+              <div className="glass-panel border border-primary/10 overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/50">
+                    <TableRow className="bg-primary/5">
                       <TableHead>Number</TableHead>
                       <TableHead>Patient</TableHead>
                       <TableHead>Doctor</TableHead>
@@ -283,8 +307,11 @@ const Prescriptions = () => {
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-6">
-                          Loading prescriptions...
+                        <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Loading prescriptions...
+                          </div>
                         </TableCell>
                       </TableRow>
                     ) : prescriptions.length === 0 ? (
@@ -303,9 +330,9 @@ const Prescriptions = () => {
                             <div className="flex flex-col">
                               <span>{prescription.patient_name}</span>
                               {prescription.patient_phone && (
-                                <span className="text-xs text-muted-foreground">
+                                <Badge className="mt-1 w-fit bg-primary/15 text-primary/90">
                                   {prescription.patient_phone}
-                                </span>
+                                </Badge>
                               )}
                             </div>
                           </TableCell>
@@ -313,14 +340,21 @@ const Prescriptions = () => {
                             <div className="flex flex-col">
                               <span>{prescription.doctor_name}</span>
                               {prescription.doctor_license && (
-                                <span className="text-xs text-muted-foreground">
+                                <Badge className="mt-1 w-fit bg-primary/15 text-primary/90">
                                   {prescription.doctor_license}
-                                </span>
+                                </Badge>
                               )}
                             </div>
                           </TableCell>
                           <TableCell>
-                            {new Date(prescription.prescription_date).toLocaleDateString()}
+                            <div className="flex flex-col">
+                              <span>{new Date(prescription.prescription_date).toLocaleDateString()}</span>
+                              {prescription.notes && (
+                                <span className="mt-1 text-xs text-muted-foreground">
+                                  {prescription.notes}
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))

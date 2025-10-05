@@ -7,6 +7,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -32,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ShoppingCart, Trash2 } from "lucide-react";
+import { Loader2, ReceiptText, ShoppingCart, Trash2 } from "lucide-react";
 
 type MedicineOption = {
   id: string;
@@ -252,6 +253,24 @@ const Sales = () => {
       const { error: saleItemsError } = await supabase.from("sale_items").insert(saleItemsPayload);
       if (saleItemsError) throw saleItemsError;
 
+      for (const item of items) {
+        const { data: medicineRecord, error: fetchError } = await supabase
+          .from("medicines")
+          .select("quantity")
+          .eq("id", item.medicineId)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        const nextQuantity = Math.max(0, (medicineRecord?.quantity ?? 0) - item.quantity);
+        const { error: updateError } = await supabase
+          .from("medicines")
+          .update({ quantity: nextQuantity })
+          .eq("id", item.medicineId);
+
+        if (updateError) throw updateError;
+      }
+
       return sale.id;
     },
     onSuccess: () => {
@@ -283,20 +302,26 @@ const Sales = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Sales & Dispensing</h1>
-          <p className="text-muted-foreground mt-1">
-            Record new sales and review recent transactions
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs uppercase tracking-[0.3em] text-primary/70">Point of Sale</span>
+          <h1 className="text-4xl font-semibold leading-tight text-white">Sales & Dispensing Console</h1>
+          <p className="max-w-2xl text-muted-foreground">
+            Build prescriptions, capture patient payments, and keep stock levels synchronized in real time.
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.6fr,1fr]">
-          <Card className="border-primary/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                New Sale
+        <div className="grid gap-6 lg:grid-cols-[1.6fr,1fr] fade-grid">
+          <Card className="glass-panel border-primary/30">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-3 text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                  <ShoppingCart className="h-5 w-5" />
+                </span>
+                <div>
+                  <span className="block text-sm uppercase tracking-[0.2em] text-white/60">Create New Sale</span>
+                  <span className="text-lg font-semibold">Dispensing Workflow</span>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -310,7 +335,7 @@ const Sales = () => {
                         <FormItem>
                           <FormLabel>Customer Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Jane Doe" {...field} />
+                            <Input placeholder="Jane Doe" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -323,7 +348,7 @@ const Sales = () => {
                         <FormItem>
                           <FormLabel>Customer Phone</FormLabel>
                           <FormControl>
-                            <Input placeholder="0712 345 678" {...field} />
+                            <Input placeholder="0712 345 678" className="glass-panel border-primary/10" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -337,7 +362,7 @@ const Sales = () => {
                           <FormLabel>Payment Method</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="glass-panel border-primary/10">
                                 <SelectValue placeholder="Select payment method" />
                               </SelectTrigger>
                             </FormControl>
@@ -364,7 +389,7 @@ const Sales = () => {
                             disabled={loadingPrescriptions}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="glass-panel border-primary/10">
                                 <SelectValue placeholder="Optional" />
                               </SelectTrigger>
                             </FormControl>
@@ -386,13 +411,13 @@ const Sales = () => {
                   <div className="space-y-4">
                     <div className="grid gap-4 md:grid-cols-[2fr,1fr,auto]">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Medicine</label>
+                        <label className="text-sm font-medium text-white/80">Medicine</label>
                         <Select
                           value={selectedMedicineId}
                           onValueChange={setSelectedMedicineId}
                           disabled={loadingMedicines || medicines.length === 0}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="glass-panel border-primary/10">
                             <SelectValue placeholder={loadingMedicines ? "Loading..." : "Select medicine"} />
                           </SelectTrigger>
                           <SelectContent>
@@ -405,16 +430,23 @@ const Sales = () => {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Quantity</label>
+                        <label className="text-sm font-medium text-white/80">Quantity</label>
                         <Input
                           type="number"
                           min={1}
                           value={itemQuantity}
                           onChange={(event) => setItemQuantity(Number(event.target.value) || 1)}
+                          className="glass-panel border-primary/10"
                         />
                       </div>
                       <div className="flex items-end">
-                        <Button type="button" onClick={handleAddItem} disabled={!medicines.length} className="w-full">
+                        <Button
+                          type="button"
+                          onClick={handleAddItem}
+                          disabled={!medicines.length || loadingMedicines}
+                          className="w-full frosted-button"
+                        >
+                          <ShoppingCart className="mr-2 h-4 w-4" />
                           Add Item
                         </Button>
                       </div>
@@ -426,10 +458,10 @@ const Sales = () => {
                       </p>
                     )}
 
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="glass-panel border border-primary/10 overflow-hidden">
                       <Table>
                         <TableHeader>
-                          <TableRow className="bg-muted/50">
+                          <TableRow className="bg-primary/5">
                             <TableHead>Medicine</TableHead>
                             <TableHead className="text-right">Quantity</TableHead>
                             <TableHead className="text-right">Unit Price</TableHead>
@@ -459,6 +491,7 @@ const Sales = () => {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => handleRemoveItem(item.medicineId)}
+                                    className="text-destructive/80 hover:text-destructive"
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
@@ -470,12 +503,18 @@ const Sales = () => {
                       </Table>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-lg font-semibold">
-                        Total: <span className="text-primary">KES {totalAmount.toLocaleString()}</span>
+                        Total Due: <span className="text-primary">KES {totalAmount.toLocaleString()}</span>
                       </p>
-                      <Button type="submit" disabled={saleMutation.isPending}>
-                        {saleMutation.isPending ? "Saving..." : "Complete Sale"}
+                      <Button type="submit" disabled={saleMutation.isPending} className="frosted-button">
+                        {saleMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
+                          </>
+                        ) : (
+                          "Complete Sale"
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -484,15 +523,23 @@ const Sales = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Sales</CardTitle>
+          <Card className="glass-panel border-primary/30">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-3 text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                  <ReceiptText className="h-5 w-5" />
+                </span>
+                <div>
+                  <span className="block text-sm uppercase tracking-[0.2em] text-white/60">Activity Feed</span>
+                  <span className="text-lg font-semibold">Recent Sales</span>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-lg overflow-hidden">
+              <div className="glass-panel border border-primary/10 overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/50">
+                    <TableRow className="bg-primary/5">
                       <TableHead>Sale #</TableHead>
                       <TableHead>Customer</TableHead>
                       <TableHead className="text-right">Total (KES)</TableHead>
@@ -503,8 +550,11 @@ const Sales = () => {
                   <TableBody>
                     {loadingSalesHistory ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-6">
-                          Loading sales...
+                        <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Loading sales...
+                          </div>
                         </TableCell>
                       </TableRow>
                     ) : salesHistory.length === 0 ? (
@@ -526,8 +576,10 @@ const Sales = () => {
                             <TableCell className="text-right font-semibold">
                               {Number(sale.total_amount).toLocaleString()}
                             </TableCell>
-                            <TableCell className="uppercase text-xs font-semibold text-muted-foreground">
-                              {sale.payment_method}
+                            <TableCell>
+                              <Badge variant="secondary" className="bg-primary/20 text-primary uppercase tracking-wide">
+                                {sale.payment_method}
+                              </Badge>
                             </TableCell>
                             <TableCell>
                               <div className="flex flex-col">

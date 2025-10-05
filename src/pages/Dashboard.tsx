@@ -109,65 +109,81 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Welcome to Pawa Pharmacy Management System
+      <div className="space-y-10">
+        <div className="max-w-4xl space-y-2">
+          <p className="text-sm uppercase tracking-[0.4em] text-white/50">Overview</p>
+          <h1 className="text-4xl font-black tracking-tight text-white">
+            Performance Intelligence Dashboard
+          </h1>
+          <p className="text-base text-white/70">
+            Monitor inventory health, real-time sales, and prescription activity across the pharmacy network.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="fade-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {statCards.map((stat, index) => (
-            <Card key={index} className="border-l-4 border-l-primary">
+            <Card
+              key={index}
+              className="glass-panel border border-white/10 p-0 transition hover:-translate-y-1"
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-semibold uppercase tracking-widest text-white/60">
                   {stat.title}
                 </CardTitle>
-                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                <div className={`rounded-xl p-2 shadow-inner ${stat.bgColor}`}>
                   <stat.icon className={`h-4 w-4 ${stat.color}`} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="text-3xl font-black text-white">{stat.value}</div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <Card>
+        <Card className="glass-panel border border-white/10">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-white">
+              <span>Quick Actions</span>
+              <span className="text-xs uppercase tracking-[0.3em] text-white/50">Navigate faster</span>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
-            <a
-              href="/sales"
-              className="p-4 border rounded-lg hover:bg-muted transition-colors"
-            >
-              <ShoppingCart className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-semibold">New Sale</h3>
-              <p className="text-sm text-muted-foreground">Process a new sale</p>
-            </a>
-            <a
-              href="/inventory"
-              className="p-4 border rounded-lg hover:bg-muted transition-colors"
-            >
-              <Package className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-semibold">Manage Inventory</h3>
-              <p className="text-sm text-muted-foreground">
-                Add or update medicines
-              </p>
-            </a>
-            <a
-              href="/prescriptions"
-              className="p-4 border rounded-lg hover:bg-muted transition-colors"
-            >
-              <AlertTriangle className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-semibold">Prescriptions</h3>
-              <p className="text-sm text-muted-foreground">
-                Manage prescriptions
-              </p>
-            </a>
+          <CardContent className="grid gap-6 md:grid-cols-3">
+            {[{
+              href: "/sales",
+              icon: ShoppingCart,
+              title: "Start New Sale",
+              description: "Process transactions, capture payments, and automatically adjust stock.",
+            },
+            {
+              href: "/inventory",
+              icon: Package,
+              title: "Inventory Console",
+              description: "Register new medicines, monitor batches, and manage reorder levels.",
+            },
+            {
+              href: "/prescriptions",
+              icon: AlertTriangle,
+              title: "Prescription Hub",
+              description: "Record prescriptions, validate requirements, and track dispensing history.",
+            }].map((action) => (
+              <a
+                key={action.href}
+                href={action.href}
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 transition duration-300 hover:-translate-y-1 hover:border-white/40"
+              >
+                <div className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100" style={{ background: "radial-gradient(circle at top, rgba(59,130,246,0.35), transparent 55%)" }} />
+                <div className="relative flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-primary shadow-inner">
+                    <action.icon className="h-6 w-6" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-white">{action.title}</h3>
+                    <p className="text-sm text-white/70">{action.description}</p>
+                  </div>
+                </div>
+              </a>
+            ))}
           </CardContent>
         </Card>
       </div>
